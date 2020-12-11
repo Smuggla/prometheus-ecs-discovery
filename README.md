@@ -42,8 +42,9 @@ Then, run it as follows:
   `AWS_SECRET_ACCESS_KEY` into the environment of the program,
   making sure that the keys have access to the EC2 / ECS APIs
   (IAM policies should include `ECS:ListClusters`,
-  `ECS:ListTasks`, `ECS:DescribeTask`, `EC2:DescribeInstances`,
-  `ECS:DescribeContainerInstances`, `ECS:DescribeTasks`,
+  `ECS:ListTasks`, `ECS:DescribeClusters`,
+  `ECS:DescribeTask`, `ECS:DescribeTasks`, 
+  `EC2:DescribeInstances`, `ECS:DescribeContainerInstances`, 
   `ECS:DescribeTaskDefinition`). If the program needs to assume
   a different role to obtain access, this role's ARN may be
   passed in via the `--config.role-arn` option. This option also
@@ -80,3 +81,21 @@ that every minute, and by default Prometheus will reload the
 file the minute it is written).  After reloading your Prometheus
 master configuration, this program will begin informing via
 the discovery file of new targets that Prometheus must scrape.
+
+
+To Run in Kubernetes as a sidecar
+```
+      containers:
+      - image: quay.io/prometheus/prometheus:v2.21.0
+        - name: ecs-data
+          mountPath: /etc/prometheus/ecs_config/
+      - image: prometheus-ecs-discovery:1.3.2
+        imagePullPolicy: IfNotPresent
+        name: ecs-discovery
+        volumeMounts:
+        - name: ecs-data
+          mountPath: /ecs-data
+     volumes:
+     - name: ecs-data
+       emptyDir: {}
+```
